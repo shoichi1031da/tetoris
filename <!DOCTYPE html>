@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id = "can"></canvas>
+<script>
+//ブロック1つのサイズ
+const blockSize = 30;
+//ミノのサイズ
+const minoSize = 4;
+
+let can = document.getElementById("can");
+let con = can.getContext("2d");
+
+let tetro = [
+	[0,0,0,0],
+	[1,1,1,0],
+	[0,0,1,0],
+	[0,0,0,0]
+];
+
+//ミノの座標
+let minoX = 0;
+let minoY = 0;
+
+drawMino();
+
+function drawMino()
+{
+	for(let y=0; y<minoSize; y++)
+	{
+		for(let x=0; x<minoSize; x++)
+		{
+			if(tetro[y][x])
+			{
+			let px = (minoX + x)*blockSize;
+			let py = (minoY + y)*blockSize;
+			con.fillStyle="blue";
+			con.fillRect(px,py,blockSize,blockSize);
+			con.strokeStyle = "black";
+			con.strokeRect(px,py,blockSize,blockSize);
+			}
+		}
+	}
+}
+// キー操作
+document.onkeydown = function(e)
+{
+		switch( e.keyCode )
+		{
+				case 37: //左
+					minoX--;
+					break;
+				case 38: //上
+					minoY--;
+					break;
+				case 29: //右
+					minoX++;
+					break;
+				case 40: //下
+					minoY++;
+					break;
+				case 32: //スペース
+					minoX++;
+					break;
+		}
+	drawMino();
+}
+
+</script>
+
+</body>
+</html>
