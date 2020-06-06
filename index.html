@@ -3,67 +3,267 @@
 <body>
 <canvas id = "can"></canvas>
 <script>
-//ブロック1つのサイズ
+//フィールドサイズ（マス数）
+const fieldCol = 10;
+const fieldRow = 20;
+
+//ブロック1つのサイズ（px）
 const blockSize = 30;
+
+//キャンバスサイズ（px）
+const screen_w = blockSize * fieldCol;
+const screen_h = blockSize * fieldRow;
+
 //ミノのサイズ
-const minoSize = 40;
+const minoSize = 4;
+
+//落ちる速さ（初期値）
+const game_speed = 300;
 
 let can = document.getElementById("can");
 let con = can.getContext("2d");
 
-let tetro = [
+can.width = screen_w;
+can.height = screen_h;
+can.style.border = "4px solid #555";
+
+const tetro_colors =[
+	"#000", //空
+	"#6CF", //水色
+	"#F92", //オレンジ
+	"#66F", //青
+	"#C5C", //紫
+	"#FD2", //黄
+	"#F44", //赤
+	"#5B5", //緑
+];
+const tetro_types =[
+//0.空っぽ
+ [],			
+
+ [			//1.I
 	[0,0,0,0],
-	[1,1,1,0],
-	[0,0,1,0],
+	[1,1,1,1],
+	[0,0,0,0],
 	[0,0,0,0]
+ ],
+ [
+			//2.L
+	[0,1,0,0],
+	[0,1,0,0],
+	[0,1,1,0],
+	[0,0,0,0]
+ ],
+ [			//3.J
+	[0,0,1,0],
+	[0,0,1,0],
+	[0,1,1,0],
+	[0,0,0,0]
+ ],
+ [			//4.T
+	[0,1,0,0],
+	[0,1,1,0],
+	[0,1,0,0],
+	[0,0,0,0]
+ ],
+ [			//5.O
+	[0,0,0,0],
+	[0,1,1,0],
+	[0,1,1,0],
+	[0,0,0,0]
+ ],
+ [			//6.Z
+	[0,0,0,0],
+	[1,1,0,0],
+	[0,1,1,0],
+	[0,0,0,0]
+ ],
+ [			//7.S
+	[0,0,0,0],
+	[0,1,1,0],
+	[1,1,0,0],
+	[0,0,0,0]
+ ],
 ];
 
+//ミノの本体
+let tetro ;
+let field =[];
+
+//初期位置
+const start_x = fieldCol/2 - minoSize/2;
+const start_y = 0;
+
 //ミノの座標
-let minoX = 0;
-let minoY = 0;
+let mino_x = start_x;
+let mino_y = start_y;
 
-drawMino();
+//テトロミノの形の決定
+	
+let tetro_t = Math.floor(Math.random()*(tetro_types.length-1))+1;
+tetro = tetro_types[tetro_t];
 
-function drawMino()
+init();
+drawAll();
+setInterval(dropTetro,game_speed);
+
+//初期化
+function init()
 {
+	//フィールドのクリア
+	for(let y=0 ; y<fieldRow ; y++)
+	{
+	    field[y] = [];
+			for(let x=0; x<fieldCol ; x++)
+			{
+				field[y][x] = 0;
+			}
+	}
+}
+
+//ブロック一つを描画する
+function drawBlock(x,y,c)
+{
+	let px = x * blockSize;
+	let py = y * blockSize;
+	
+	con.fillStyle=tetro_colors[c];
+	con.fillRect(px,py,blockSize,blockSize);
+	con.strokeStyle = "black";
+	con.strokeRect(px,py,blockSize,blockSize);
+}
+
+//全部描画する
+function drawAll()
+{
+	//フィールドの描画
+	con.clearRect(0,0,screen_w,screen_h);
+
+	for(let y=0 ; y<fieldRow ; y++)
+	{
+		for(let x=0 ; x<fieldCol ; x++)
+		{
+			if(field[y][x])
+			{
+			　drawBlock(x,y,field[y][x]);
+			}
+			else
+			{
+				let px = x * blockSize;
+				let py = y * blockSize;
+				con.fillStyle = "white" ;
+				con.fillRect(px,py,blockSize,blockSize);
+				con.strokeStyle = "#fff1ef";
+				con.strokeRect(px,py,blockSize,blockSize);
+			}
+		}
+	}
+	//ミノの描画
+
 	for(let y=0; y<minoSize; y++)
 	{
 		for(let x=0; x<minoSize; x++)
 		{
 			if(tetro[y][x])
 			{
-			let px = (minoX + x)*blockSize;
-			let py = (minoY + y)*blockSize;
-			con.fillStyle="blue";
-			con.fillRect(px,py,blockSize,blockSize);
-			con.strokeStyle = "black";
-			con.strokeRect(px,py,blockSize,blockSize);
+			 drawBlock(mino_x + x,mino_y + y,tetro_t);
 			}
 		}
 	}
 }
+
+//当たり判定
+function checkMove(mx,my,ntetro)
+{
+	if(ntetro == undefined) ntetro = tetro;
+	for(let y=0; y<minoSize; y++)
+	{
+		for(let x=0; x<minoSize; x++)
+		{
+			if(ntetro[y][x])
+			{
+				let nx = mino_x + mx + x;
+			    let ny = mino_y + my + y;
+				if(nx<0 || ny<0 || nx >= fieldCol || ny >= fieldRow || field[ny][nx])
+				{
+				return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+//テトロの回転
+function rotate()
+{
+	let ntetro = [];
+	for(let y=0 ; y<minoSize ; y++)
+	{
+		ntetro[y] = [];
+		for(let x=0 ; x<minoSize ; x++)
+		{
+			ntetro[y][x] = tetro[minoSize-x-1][y];
+		}
+	}
+	return ntetro;
+}
+
+//落ちる動作
+function dropTetro()
+{
+	if(checkMove(0,1))mino_y++;
+	else
+	{
+		fixTetro();
+		tetro_t = Math.floor(Math.random()*(tetro_types.length-1))+1;
+		tetro = tetro_types[tetro_t];
+		mino_x = start_x;
+		mino_y = start_y;
+		game_speed = 300
+	}
+	drawAll();
+}
+
+//テトロの固定
+function fixTetro()
+{
+	for(let y=0 ; y<minoSize ; y++)
+	{
+		for(let x=0 ; x<minoSize ; x++)
+		if(tetro[y][x])
+		{
+			field[mino_y + y][mino_x + x] = tetro_t;
+		}
+	}
+}
+
 // キー操作
 document.onkeydown = function(e)
 {
 		switch( e.keyCode )
 		{
 				case 37: //左
-					minoX--;
+					if(checkMove(-1,0))mino_x--;
 					break;
 				case 38: //上
-					minoY--;
+				for(let i=0 ; i = checkMove(0,1);i++)
+					{
+					mino_y++;
+					}
 					break;
-				case 29: //右
-					minoX++;
+				case 39: //右
+					if(checkMove(1,0))mino_x++;
 					break;
 				case 40: //下
-					minoY++;
+				if(checkMove(0,1))mino_y++;
 					break;
 				case 32: //スペース
-					minoX++;
+					let ntetro = rotate();
+					if(checkMove(0,0,ntetro)) tetro = ntetro;
 					break;
 		}
-	drawMino();
+	drawAll();
 }
 
 </script>
