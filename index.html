@@ -212,10 +212,11 @@ function rotate()
 //落ちる動作
 function dropTetro()
 {
-	if(checkMove(0,1))mino_y++;
-	else
+	if(checkMove(0,1)){mino_y++;}
+	else //ミノが落ち切った時
 	{
 		fixTetro();
+		checkLine();
 		tetro_t = Math.floor(Math.random()*(tetro_types.length-1))+1;
 		tetro = tetro_types[tetro_t];
 		mino_x = start_x;
@@ -225,7 +226,37 @@ function dropTetro()
 	drawAll();
 }
 
-//テトロの固定
+//ラインの判定（消す）
+function checkLine()
+{
+	let lineCount = 0;
+	for(y=0;y<fieldRow;y++)
+	{
+		let flag = true;
+		for(x=0;fieldCol;x++)
+		{
+			if(!field[y][x])
+			{
+				flag = false;
+				break;
+			}
+		}
+		if(flag)
+		{
+			lineCount++;
+			for(let ny=y; ny > 0; ny--)
+			{
+				for(let nx=0; nx < fieldCol; nx++)
+				{
+					field[ny][nx] = field[ny-1][nx];
+				}
+			}
+		}
+	}
+}
+
+
+//テトロミノの固定
 function fixTetro()
 {
 	for(let y=0 ; y<minoSize ; y++)
