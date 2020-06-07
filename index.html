@@ -93,6 +93,9 @@ let field =[];
 //ゲームオーバーフラグ
 let over = false;
 
+//スコア
+let lineCount = 0;
+
 //初期位置
 const start_x = fieldCol/2 - minoSize/2;
 const start_y = 0;
@@ -173,6 +176,18 @@ function drawAll()
 			}
 		}
 	}
+	//スコア
+/* 	let score = "Score " + lineCount;
+	con.font = "20px 'MS ゴシック'";
+	let score_w = con.measureText(score).width;
+	let score_x = screen_w;
+	let score_y = screen_h;
+	con.lineWidth = 4;
+	//con.strokeText(score,score_x,score_y);
+	con.fillStyle = "red";
+	con.fillText(score,score_x,score_y);
+ */
+	//ゲームオーバー
 	if(over)
 	{
 		let s = "Game Over";
