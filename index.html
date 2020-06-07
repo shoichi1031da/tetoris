@@ -90,6 +90,9 @@ const tetro_types =[
 let tetro ;
 let field =[];
 
+//ゲームオーバーフラグ
+let over = false;
+
 //初期位置
 const start_x = fieldCol/2 - minoSize/2;
 const start_y = 0;
@@ -170,6 +173,19 @@ function drawAll()
 			}
 		}
 	}
+	if(over)
+	{
+		let s = "Game Over";
+		con.font = "40px 'MS ゴシック'";
+		let w = con.measureText(s).width;
+		let x = screen_w/2 - w/2;
+		let y = screen_h/2 - 20;
+		con.lineWidth = 4;
+		con.strokeText(s,x,y);
+		con.fillStyle = "white";
+		con.fillText(s,x,y);
+	}
+
 }
 
 //当たり判定
@@ -212,6 +228,8 @@ function rotate()
 //落ちる動作
 function dropTetro()
 {
+	if(over)return;
+
 	if(checkMove(0,1)){mino_y++;}
 	else //ミノが落ち切った時
 	{
@@ -221,7 +239,11 @@ function dropTetro()
 		tetro = tetro_types[tetro_t];
 		mino_x = start_x;
 		mino_y = start_y;
-		game_speed = 300;
+
+		if(!checkMove(0,0))
+		{
+			over = true;
+		}
 	}
 	drawAll();
 }
@@ -272,6 +294,8 @@ function fixTetro()
 // キー操作
 document.onkeydown = function(e)
 {
+	if(over)return;
+
 		switch( e.keyCode )
 		{
 				case 37: //左
