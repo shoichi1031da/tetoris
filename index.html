@@ -18,7 +18,7 @@ const screen_h = blockSize * fieldRow;
 const minoSize = 4;
 
 //落ちる速さ（初期値）
-const game_speed = 300;
+let game_speed = 300;
 
 let can = document.getElementById("can");
 let con = can.getContext("2d");
@@ -221,7 +221,7 @@ function dropTetro()
 		tetro = tetro_types[tetro_t];
 		mino_x = start_x;
 		mino_y = start_y;
-		game_speed = 300
+		game_speed = 300;
 	}
 	drawAll();
 }
@@ -233,7 +233,7 @@ function checkLine()
 	for(y=0;y<fieldRow;y++)
 	{
 		let flag = true;
-		for(x=0;fieldCol;x++)
+		for(x=0;x<fieldCol;x++)
 		{
 			if(!field[y][x])
 			{
