@@ -23,9 +23,9 @@ let game_speed = 300;
 let can = document.getElementById("can");
 let con = can.getContext("2d");
 
-can.width = screen_w;
+can.width = screen_w + 200;
 can.height = screen_h;
-can.style.border = "4px solid #555";
+can.style.border = "2px solid #555";
 
 const tetro_colors =[
 	"#000", //空
@@ -87,7 +87,7 @@ const tetro_types =[
 ];
 
 //ミノの本体
-let tetro ;
+let tetro = [] ;
 let field =[];
 
 //ゲームオーバーフラグ
@@ -99,15 +99,20 @@ let lineCount = 0;
 //初期位置
 const start_x = fieldCol/2 - minoSize/2;
 const start_y = 0;
+const next_x = screen_w + 20;
+const next_y = 20;
 
 //ミノの座標
 let mino_x = start_x;
 let mino_y = start_y;
 
+
 //テトロミノの形の決定
-	
-let tetro_t = Math.floor(Math.random()*(tetro_types.length-1))+1;
-tetro = tetro_types[tetro_t];
+
+let tetro_now = Math.floor(Math.random()*(tetro_types.length-1))+1;
+let tetro_next = Math.floor(Math.random()*(tetro_types.length-1))+1;
+tetro0 = tetro_types[tetro_now];
+tetro1 = tetro_types[tetro_next];
 
 init();
 drawAll();
@@ -143,7 +148,7 @@ function drawBlock(x,y,c)
 function drawAll()
 {
 	//フィールドの描画
-	con.clearRect(0,0,screen_w,screen_h);
+	con.clearRect(0,0,screen_w + 200,screen_h);
 
 	for(let y=0 ; y<fieldRow ; y++)
 	{
@@ -157,9 +162,9 @@ function drawAll()
 			{
 				let px = x * blockSize;
 				let py = y * blockSize;
-				con.fillStyle = "white" ;
+				con.fillStyle = "#fff1ef" ;
 				con.fillRect(px,py,blockSize,blockSize);
-				con.strokeStyle = "#fff1ef";
+				con.strokeStyle = "white";
 				con.strokeRect(px,py,blockSize,blockSize);
 			}
 		}
@@ -170,23 +175,79 @@ function drawAll()
 	{
 		for(let x=0; x<minoSize; x++)
 		{
-			if(tetro[y][x])
+			if(tetro0[y][x])
 			{
-			 drawBlock(mino_x + x,mino_y + y,tetro_t);
+			 drawBlock(mino_x + x,mino_y + y,tetro_now);
 			}
 		}
 	}
+	//nextミノ
+	for(let y=0 ; y<minoSize ; y++)
+	{
+		for(let x = 0 ; x<minoSize ; x++)
+		{
+
+			if(tetro1[y][x])
+			{
+				let px = x * (blockSize -10) + next_x;
+				let py = y * (blockSize -10) + next_y;
+	
+				con.fillStyle=tetro_colors[tetro_next];
+				con.fillRect(px,py,blockSize-10,blockSize-10);
+				con.strokeStyle = "black";
+				con.strokeRect(px,py,blockSize-10,blockSize-10);
+			}else
+			{
+				let px = x * (blockSize -10) + next_x;
+				let py = y * (blockSize -10) + next_y;
+	
+				con.fillStyle="#b5ffff";
+				con.fillRect(px,py,blockSize-10,blockSize-10);
+				con.strokeStyle = "white";
+				con.strokeRect(px,py,blockSize-10,blockSize-10);
+			}
+			let score = "Next"
+			con.font = "20px 'MS ゴシック'";
+			let score_w = con.measureText(score).width;
+			let score_x = screen_w + 110;
+			let score_y = 65;
+			con.fillStyle = "#008bff";
+			con.fillText(score,score_x,score_y);
+		}
+	}
+	//予測ミノ
+	// for(y=0;y<fieldRow;y++)
+	// {
+	// 	for(let x=0 ; x<minoSize ; x++)
+	// 	{	
+	// 		if(!checkMove(0,1))break;
+	// 	}	
+	
+	// 	for(let x=0 ; x<minoSize ; x++)
+	// 	{	
+	// 		field[mino_y + y][mino_x] = tetro_now;
+	// 	}
+	// }
+
+			// let px = x * blockSize + mino_x;
+			// let py = blockSize + y;
+	
+			// con.fillStyle="#dcdcdc";
+			// con.fillRect(px,py,blockSize,blockSize);
+			// con.strokeStyle = "";
+			// con.strokeRect(px,py,blockSize,blockSize);	
+	
+
+
 	//スコア
-/* 	let score = "Score " + lineCount;
-	con.font = "20px 'MS ゴシック'";
+ 	let score = "Score " + lineCount*1000;
+	con.font = "25px 'MS ゴシック'";
 	let score_w = con.measureText(score).width;
-	let score_x = screen_w;
-	let score_y = screen_h;
-	con.lineWidth = 4;
-	//con.strokeText(score,score_x,score_y);
+	let score_x = screen_w + 10;
+	let score_y = screen_h - 10;
 	con.fillStyle = "red";
 	con.fillText(score,score_x,score_y);
- */
+	
 	//ゲームオーバー
 	if(over)
 	{
@@ -195,9 +256,9 @@ function drawAll()
 		let w = con.measureText(s).width;
 		let x = screen_w/2 - w/2;
 		let y = screen_h/2 - 20;
-		con.lineWidth = 4;
+		//con.lineWidth = 4;
 		con.strokeText(s,x,y);
-		con.fillStyle = "white";
+		con.fillStyle = "red";
 		con.fillText(s,x,y);
 	}
 
@@ -206,7 +267,7 @@ function drawAll()
 //当たり判定
 function checkMove(mx,my,ntetro)
 {
-	if(ntetro == undefined) ntetro = tetro;
+	if(ntetro == undefined) ntetro = tetro0;
 	for(let y=0; y<minoSize; y++)
 	{
 		for(let x=0; x<minoSize; x++)
@@ -234,7 +295,7 @@ function rotate()
 		ntetro[y] = [];
 		for(let x=0 ; x<minoSize ; x++)
 		{
-			ntetro[y][x] = tetro[minoSize-x-1][y];
+			ntetro[y][x] = tetro0[minoSize - x - 1][y];
 		}
 	}
 	return ntetro;
@@ -245,16 +306,18 @@ function dropTetro()
 {
 	if(over)return;
 
-	if(checkMove(0,1)){mino_y++;}
+	if(checkMove(0,1))mino_y++;
 	else //ミノが落ち切った時
 	{
 		fixTetro();
 		checkLine();
-		tetro_t = Math.floor(Math.random()*(tetro_types.length-1))+1;
-		tetro = tetro_types[tetro_t];
+		tetro_now = tetro_next;
+		tetro0 = tetro1;
+		tetro_next = Math.floor(Math.random()*(tetro_types.length-1))+1;
+		tetro1 = tetro_types[tetro_next];
 		mino_x = start_x;
 		mino_y = start_y;
-
+	
 		if(!checkMove(0,0))
 		{
 			over = true;
@@ -266,7 +329,6 @@ function dropTetro()
 //ラインの判定（消す）
 function checkLine()
 {
-	let lineCount = 0;
 	for(y=0;y<fieldRow;y++)
 	{
 		let flag = true;
@@ -289,7 +351,8 @@ function checkLine()
 				}
 			}
 		}
-	}
+	} 
+	drawAll(lineCount);
 }
 
 
@@ -299,9 +362,9 @@ function fixTetro()
 	for(let y=0 ; y<minoSize ; y++)
 	{
 		for(let x=0 ; x<minoSize ; x++)
-		if(tetro[y][x])
+		if(tetro0[y][x])
 		{
-			field[mino_y + y][mino_x + x] = tetro_t;
+			field[mino_y + y][mino_x + x] = tetro_now;
 		}
 	}
 }
@@ -330,7 +393,7 @@ document.onkeydown = function(e)
 					break;
 				case 32: //スペース
 					let ntetro = rotate();
-					if(checkMove(0,0,ntetro)) tetro = ntetro;
+					if(checkMove(0,0,ntetro)) tetro0 = ntetro;
 					break;
 		}
 	drawAll();
